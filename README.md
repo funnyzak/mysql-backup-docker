@@ -19,12 +19,12 @@ Docker Pull Command: `docker pull funnyzak/mysql-backup`
 
 ## Features
 
+* only 28MB
 * dump to local filesystem
 * multiple database backups
 * select database user and password
-* connect to any container running on the same system
-* select how often to run a dump
-* when backuping send notification
+* crontab to run a dump
+* when dumping send notification
 
 ---
 
@@ -105,7 +105,7 @@ docker run --name="mysql-backup" -d --restart=always \
 -e 'DB_NAMES=wordpress_db ghost_db' \
 -e 'DUMP_FILE_EXPIRE_DAY=30' \
 -e 'DB_DUMP_CRON=0 0 * * *' \
--v /local/file/path:/db \
+-v /local/db/mysql:/db \
 funnyzak/mysql-backup
 ```
 
