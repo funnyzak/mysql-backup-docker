@@ -56,6 +56,16 @@ __You should consider the [use of `--env-file=`](https://docs.docker.com/engine/
 * ***BEFORE_DUMP_COMMAND***: before dump then run command. Optional.
 * ***AFTER_DUMP_COMMAND***: after dump then run command. Optional.
 
+Before dump has some Available variables:
+
+* ***now***: dump db files. time variable.
+  
+After dump has some Available variables:
+
+* ***ELAPSED_TIME***: dump db spent time (Second).
+* **DUMPED_DB_FILES**: dump db file name list.
+* **DUMPED_COMPRESS_FILE**: package file name.
+
 ### Notify
 
 * **NOTIFY_URL_LIST**: Optional. Notify link array , each separated by **|**
@@ -99,7 +109,7 @@ To run a backup, launch `mysql-backup` image as a container with the correct par
 For example:
 
 ```bash
-docker run --name="mysql-backup" -d --restart=always \
+docker run --name=backdb -d --restart=always \
 -e 'DB_HOST=db-container' \
 -e 'DB_PORT=3306' \
 -e 'DB_USER=potato' \
@@ -107,7 +117,7 @@ docker run --name="mysql-backup" -d --restart=always \
 -e 'DB_NAMES=wordpress_db ghost_db' \
 -e 'DUMP_FILE_EXPIRE_DAY=30' \
 -e 'DB_DUMP_CRON=0 0 * * *' \
--v /local/db/mysql:/db \
+-v '/local/path/db:/db' \
 funnyzak/mysql-backup
 ```
 
@@ -115,13 +125,37 @@ The above will run a dump every day at 00:00, from the database accessible in th
 
 Or, if you prefer compose:
 
+Simple parameter:
+
 ```docker-compose
 version: '3'
 services:
   backup:
     image: funnyzak/mysql-backup
     privileged: true
-    container_name: db-back
+    container_name: backdb
+    tty: true
+    environment:
+      - DB_DUMP_CRON=0 0 * * *
+      - DB_HOST=170.168.10.1
+      - DB_NAMES=dbname1 dbname2
+      - DB_USER=potato
+      - DB_PASSWORD=thisispwd
+      - DB_PORT=3006
+    restart: on-failure
+    volumes:
+      - bk/db:/db
+```
+
+Complete parameter:
+
+```docker-compose
+version: '3'
+services:
+  backup:
+    image: funnyzak/mysql-backup
+    privileged: true
+    container_name: backdb
     logging:
       driver: 'json-file'
       options:

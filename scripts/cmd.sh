@@ -5,6 +5,8 @@ set -e
 
 chmod +x -R /scripts
 
+chmod +x /cron-backup.sh
+
 CRON_STRINGS="$DB_DUMP_CRON /cron-backup.sh >> /var/log/cron/cron.log 2>&1"
 
 echo -e "$CRON_STRINGS\n" > /var/spool/cron/crontabs/CRON_STRINGS

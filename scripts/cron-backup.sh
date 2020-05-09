@@ -3,9 +3,16 @@
 
 source /utils.sh
 
+# dumped db file list name
+DUMPED_DB_FILES
+
+# package file name
+DUMPED_COMPRESS_FILE
+
 function do_dump() {
     work_dir=$TMPDIR
     rm ${TMPDIR}/* -rf
+    cd $work_dir
 
     if [ -n "$DB_NAMES" -a -n "$DB_DUMP_BY_SCHEMA" -a "$DB_DUMP_BY_SCHEMA" = "true" ]; then
         for onedb in $DB_NAMES; do
@@ -24,10 +31,13 @@ function do_dump() {
         [ $? -ne 0 ] && return 1
     fi
 
+    DUMPED_DB_FILES=$(ls *.${SQL_FILE_EXTENSION})
+    DUMPED_COMPRESS_FILE=${dump_name_tail}.zip
+
     if [ -n "$IS_COMPRESS" -a "$IS_COMPRESS" = "true" ]; then
         mkdir -p $DB_DUMP_TARGET_DIR/zip
-        echo -e "\ncompress db sql files:\n `ls`\n"
-        zip $work_dir/$dump_name_tail.zip $work_dir/*.${SQL_FILE_EXTENSION} && (mv $work_dir/$dump_name_tail.zip $DB_DUMP_TARGET_DIR/zip/$dump_name_tail.zip)
+        echo -e "\ncompress db sql files:\n${DUMPED_DB_FILES}"
+        zip $work_dir/${DUMPED_COMPRESS_FILE} ./*.${SQL_FILE_EXTENSION} && (mv $work_dir/${DUMPED_COMPRESS_FILE} $DB_DUMP_TARGET_DIR/zip/${DUMPED_COMPRESS_FILE})
     fi
 
     mkdir -p $DB_DUMP_TARGET_DIR/sql
