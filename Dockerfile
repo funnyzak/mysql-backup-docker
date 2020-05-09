@@ -57,4 +57,4 @@ COPY /scripts/* /
 # add permission
 RUN chmod +x /cron-backup.sh
 
-CMD ["/cmd.sh"]
+CMD ["/bin/bash", "/cmd.sh"]

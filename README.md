@@ -165,4 +165,3 @@ There are 2 builds: 1 for version based on the git tag, and another for the part
 ## License
 
 Released under the MIT License.
-Copyright Avi Deitcher https://github.com/deitch
