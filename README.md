@@ -52,7 +52,7 @@ __You should consider the [use of `--env-file=`](https://docs.docker.com/engine/
 * ***MYSQLDUMP_OPTS***: A string of options to pass to mysqldump, e.g. MYSQLDUMP_OPTS="--opt abc --param def --max_allowed_packet=123455678" will run mysqldump --opt abc --param def --max_allowed_packet=123455678  Optional.
 * ***SQL_FILE_EXTENSION***: defaults to sql. Optional.
 * ***IS_COMPRESS***: Whether to compressed db files (true). defaults to true. Optional.
-* ***DUMP_FILE_EXPIRE_DAY***: dump file expire day, expired will be deleted. defaults to 180. Optional.
+* ***DUMP_FILE_EXPIRE_DAY***: dump file expire day, expired will be deleted. defaults to 30. Optional.
 * ***BEFORE_DUMP_COMMAND***: before dump then run command. Optional.
 * ***AFTER_DUMP_COMMAND***: after dump then run command. Optional.
 
