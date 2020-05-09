@@ -36,7 +36,7 @@ The following are the environment variables for a backup:
 
 __You should consider the [use of `--env-file=`](https://docs.docker.com/engine/reference/commandline/run/#set-environment-variables--e---env---env-file), [docker secrets](https://docs.docker.com/engine/swarm/secrets/) to keep your secrets out of your shell history__
 
-### DataBase Connection
+### Connection
 
 * ***DB_HOST***:hostname to connect to database. Required.
 * ***DB_NAMES***: names of databases to dump. eg: ***dbname1 dbname2***. defaults to all databases. Optional.
@@ -44,7 +44,7 @@ __You should consider the [use of `--env-file=`](https://docs.docker.com/engine/
 * ***DB_PASSWORD***: password for the database. Required.
 * ***DB_PORT***: port to use to connect to database. defaults to 3306, Optional.
 
-### Back UP
+### BackUp
 
 * ***DUMP_ONCE_START***: Whether to dump when the container is started. Defaults to true. Optional.
 * ***DB_DUMP_BY_SCHEMA***: Whether to use separate files per schema in the compressed file (true), if **true**, you need set **DB_NAMES**. or a single dump file (false). Defaults to false. Optional.
@@ -74,7 +74,7 @@ After dump has some Available variables:
 * **JISHIDA_TOKEN_LIST**: Optional. JiShiDa TokenList, each separated by **|**. [Official Site](http://push.ijingniu.cn/admin/index/).
 * **APP_NAME** : Optional. When setting notify, it is best to set.
 
-### Cron Scheduling
+### Cron
 
 * **DB_DUMP_CRON**: crontab rules. Defaults to `0 0 * * *`. Optional. [See this](http://crontab.org/).
 
@@ -102,7 +102,7 @@ docker logs -f -t --tail 100 container-name
 
 ---
 
-## How To Run
+## Run
 
 To run a backup, launch `mysql-backup` image as a container with the correct parameters. Everything is controlled by environment variables passed to the container.
 
