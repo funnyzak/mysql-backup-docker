@@ -7,6 +7,8 @@ only 28 MB. automatically back up the MySQL database and send notification messa
 
 This image is based on Alpine Linux image, which is only a 28MB image.
 
+Installed packages: dcron bash git zip unzip bzip2 gzip tar wget rsync ca-certificates curl mysql-client
+
 Download size of this image is:
 
 [![](https://images.microbadger.com/badges/image/funnyzak/mysql-backup.svg)](http://microbadger.com/images/funnyzak/mysql-backup)
