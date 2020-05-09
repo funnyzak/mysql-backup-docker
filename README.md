@@ -38,31 +38,31 @@ __You should consider the [use of `--env-file=`](https://docs.docker.com/engine/
 
 ### Connection
 
-* ***DB_HOST***:hostname to connect to database. Required.
-* ***DB_NAMES***: names of databases to dump. eg: ***dbname1 dbname2***. defaults to all databases. Optional.
-* ***DB_USER***:  username for the database.  Optional, defaults to root. Optional.
-* ***DB_PASSWORD***: password for the database. Required.
-* ***DB_PORT***: port to use to connect to database. defaults to 3306, Optional.
+* **DB_HOST**:hostname to connect to database. Required.
+* **DB_NAMES**: names of databases to dump. eg: **dbname1 dbname2**. defaults to all databases. Optional.
+* **DB_USER**:  username for the database.  Optional, defaults to root. Optional.
+* **DB_PASSWORD**: password for the database. Required.
+* **DB_PORT**: port to use to connect to database. defaults to 3306, Optional.
 
 ### BackUp
 
-* ***DUMP_ONCE_START***: Whether to dump when the container is started. Defaults to true. Optional.
-* ***DB_DUMP_BY_SCHEMA***: Whether to use separate files per schema in the compressed file (true), if **true**, you need set **DB_NAMES**. or a single dump file (false). Defaults to false. Optional.
-* ***DB_DUMP_TARGET_DIR***: starts with a / character, will dump to a local path, which should be volume-mounted. defaults to /db. Optional.
-* ***MYSQLDUMP_OPTS***: A string of options to pass to mysqldump, e.g. MYSQLDUMP_OPTS="--opt abc --param def --max_allowed_packet=123455678" will run mysqldump --opt abc --param def --max_allowed_packet=123455678  Optional.
-* ***SQL_FILE_EXTENSION***: defaults to sql. Optional.
-* ***IS_COMPRESS***: Whether to compressed db files (true). defaults to true. Optional.
-* ***DUMP_FILE_EXPIRE_DAY***: dump file expire day, expired will be deleted. defaults to 30. Optional.
-* ***BEFORE_DUMP_COMMAND***: before dump then run command. Optional.
-* ***AFTER_DUMP_COMMAND***: after dump then run command. Optional.
+* **DUMP_ONCE_START**: Whether to dump when the container is started. Defaults to true. Optional.
+* **DB_DUMP_BY_SCHEMA**: Whether to use separate files per schema in the compressed file (true), if **true**, you need set **DB_NAMES**. or a single dump file (false). Defaults to false. Optional.
+* **DB_DUMP_TARGET_DIR**: starts with a / character, will dump to a local path, which should be volume-mounted. defaults to /db. Optional.
+* **MYSQLDUMP_OPTS**: A string of options to pass to mysqldump, e.g. MYSQLDUMP_OPTS="--opt abc --param def --max_allowed_packet=123455678" will run mysqldump --opt abc --param def --max_allowed_packet=123455678  Optional.
+* **SQL_FILE_EXTENSION**: defaults to sql. Optional.
+* **IS_COMPRESS**: Whether to compressed db files (true). defaults to true. Optional.
+* **DUMP_FILE_EXPIRE_DAY**: dump file expire day, expired will be deleted. defaults to 30. Optional.
+* **BEFORE_DUMP_COMMAND**: before dump then run command. Optional.
+* **AFTER_DUMP_COMMAND**: after dump then run command. Optional.
 
 Before dump has some Available variables:
 
-* ***now***: dump db files. time variable.
+* **now**: dump db files. time variable.
   
 After dump has some Available variables:
 
-* ***ELAPSED_TIME***: dump db spent time (Second).
+* **ELAPSED_TIME**: dump db spent time (Second).
 * **DUMPED_DB_FILES**: dump db file name list.
 * **DUMPED_COMPRESS_FILE**: package file name.
 
