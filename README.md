@@ -198,6 +198,14 @@ This github repo is the source for the mysql-backup image. The actual image is s
 
 There are 2 builds: 1 for version based on the git tag, and another for the particular version number.
 
+---
+
+## Further
+
+* After Dump, automatically upload QiNiu, Aliyun, Tencent Cloud.
+
+---
+
 ## License
 
 Released under the MIT License.
