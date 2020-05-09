@@ -7,6 +7,7 @@ LABEL org.label-schema.vendor="funnyzak<silenceace@gmail.com>" \
     org.label-schema.name="mysql backup and notify" \
     org.label-schema.build-date="${BUILD_DATE}" \
     org.label-schema.description="This image is based on Alpine Linux image, which is only a 28MB image." \
+    org.label-schema.docker.cmd="docker run --name=backdb -d --restart=always  -e 'DB_HOST=db-container'  -e 'DB_PORT=3306'  -e 'DB_USER=potato'  -e 'DB_PASSWORD=123456'  -e 'DB_NAMES=wordpress_db ghost_db'  -e 'DUMP_FILE_EXPIRE_DAY=30'  -e 'DB_DUMP_CRON=0 0 * * *'  -v '/local/path/db:/db'  funnyzak/mysql-backup" \
     org.label-schema.url="https://yycc.me" \
     org.label-schema.version="1.0.0" \
     org.label-schema.schema-version="1.0"	\
