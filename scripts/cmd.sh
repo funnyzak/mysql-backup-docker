@@ -13,6 +13,10 @@ echo -e "$CRON_STRINGS\n" > /var/spool/cron/crontabs/CRON_STRINGS
 
 chmod -R 0644 /var/spool/cron/crontabs
 
+echo -e "\nShow Env Vars:"
+
+printenv
+
 # run once start
 if [ -n "$DUMP_ONCE_START" -a "$DUMP_ONCE_START" = "true" ]; then
     /cron-backup.sh >> /var/log/cron/cron.log 2>&1 &

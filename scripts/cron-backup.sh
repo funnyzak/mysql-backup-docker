@@ -4,10 +4,10 @@
 source /utils.sh
 
 # dumped db file list name
-DUMPED_DB_FILES
+DUMPED_DB_FILES=
 
 # package file name
-DUMPED_COMPRESS_FILE
+DUMPED_COMPRESS_FILE=
 
 function do_dump() {
     work_dir=$TMPDIR
@@ -90,8 +90,6 @@ now=$(date +%Y-%m-%d_%H-%M-%S)
 dump_name_tail=dbback_$now
 expire_minute=`expr $DUMP_FILE_EXPIRE_DAY \* 1440`
 
-echo -e "\nShow Env:"
-printenv | more
 echo -e "\nShow Variable:"
 echo -e "now => ${now}\ndump_name_tail => ${dump_name_tail}"
 echo -e "expire_minute => ${expire_minute}"

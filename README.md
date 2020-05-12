@@ -69,6 +69,7 @@ After dump has some Available variables:
 ### Notify
 
 * **NOTIFY_URL_LIST**: Optional. Notify link array , each separated by **|**
+* **TELEGRAM_BOT_TOKEN**: Optional. telegram Bot Token-chatid setting. eg: **token###chatid|token2###chatid2**. each separated by **|** [Official Site](https://core.telegram.org/api).
 * **IFTTT_HOOK_URL_LIST** : Optional. ifttt webhook url array , each separated by **|** [Official Site](https://ifttt.com/maker_webhooks).
 * **DINGTALK_TOKEN_LIST**: Optional. DingTalk Bot TokenList, each separated by **|** [Official Site](http://www.dingtalk.com).
 * **JISHIDA_TOKEN_LIST**: Optional. JiShiDa TokenList, each separated by **|**. [Official Site](http://push.ijingniu.cn/admin/index/).
@@ -181,6 +182,7 @@ services:
       - AFTER_DUMP_COMMAND=source /scripts/after_run.sh
       - APP_NAME=MyApp
       - JISHIDA_TOKEN_LIST=jishidatoken
+      - TELEGRAM_BOT_TOKEN=123456789:SDFW33-CbovPM2TeHFCiPUDTLy1uYmN04I###9865678987
       - NOTIFY_URL_LIST=http://link1.com/notify1|http://link2.com/notify2
       - DINGTALK_TOKEN_LIST=dingtalktoken1|dingtalktoken2
       - IFTTT_HOOK_URL_LIST=https://maker.ifttt.com/trigger/cron_notify/with/key/ifttttoken-s3Up
