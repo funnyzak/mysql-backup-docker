@@ -47,7 +47,7 @@ function do_dump() {
 echo -e "\n\nDB BACK TASK START=============================================="
 
 # notify 
-notify_all "DbBackUp" "Progressing.."
+# notify_all "DbBackUp" "Progressing.."
 
 # sql file ext
 if [ -z "${SQL_FILE_EXTENSION}" ]; then
