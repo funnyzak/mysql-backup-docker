@@ -17,7 +17,7 @@ function do_dump() {
     if [ -n "$DB_NAMES" -a -n "$DB_DUMP_BY_SCHEMA" -a "$DB_DUMP_BY_SCHEMA" = "true" ]; then
         for onedb in $DB_NAMES; do
             echo -e "dump db name: $onedb"
-            mysqldump -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD --databases ${onedb} $MYSQLDUMP_OPTS > $work_dir/${onedb}_${dump_name_tail}.${SQL_FILE_EXTENSION}
+            mysqldump --no-tablespaces -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD --databases ${onedb} $MYSQLDUMP_OPTS > $work_dir/${onedb}_${dump_name_tail}.${SQL_FILE_EXTENSION}
             [ $? -ne 0 ] && return 1
         done
     else
@@ -27,7 +27,7 @@ function do_dump() {
         else
             DB_LIST="-A"
         fi
-            mysqldump -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_LIST $MYSQLDUMP_OPTS > $work_dir/${dump_name_tail}.${SQL_FILE_EXTENSION}
+            mysqldump --no-tablespaces -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_LIST $MYSQLDUMP_OPTS > $work_dir/${dump_name_tail}.${SQL_FILE_EXTENSION}
         [ $? -ne 0 ] && return 1
     fi
 

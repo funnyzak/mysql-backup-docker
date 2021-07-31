@@ -15,11 +15,16 @@ LABEL org.label-schema.vendor="funnyzak<silenceace@gmail.com>" \
     org.label-schema.vcs-ref="${VCS_REF}" \
     org.label-schema.vcs-url="https://github.com/funnyzak/mysql-backup-docker" 
 
-# create temp folder
-RUN mkdir -p /tmp/backups
-
 ENV TZ Asia/Shanghai
 ENV LANG C.UTF-8
+
+# 安装 mariadb-connector-c 解决mysql8 ": Authentication plugin 'caching_sha2_password' cannot be loaded" 问题
+RUN apk update && apk upgrade && \
+    apk add --no-cache mysql-client mariadb-connector-c && \
+    rm  -rf /tmp/* /var/cache/apk/*
+
+# create temp folder
+RUN mkdir -p /tmp/backups
 
 # temp dir
 ENV TMPDIR /tmp/backups
