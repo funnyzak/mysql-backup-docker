@@ -1,6 +1,6 @@
 # docker-mysql-backup
 
-only 28 MB. automatically back up the MySQL database and send notification messages docker image.
+only 28 MB. automatically back up the MySQL database and send notification messages docker image. (for mysql 5.8)
 
 [![Docker Stars](https://img.shields.io/docker/stars/funnyzak/mysql-backup.svg?style=flat-square)](https://hub.docker.com/r/funnyzak/mysql-backup/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/funnyzak/mysql-backup.svg?style=flat-square)](https://hub.docker.com/r/funnyzak/mysql-backup/)
