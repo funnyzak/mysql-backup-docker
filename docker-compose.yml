@@ -1,0 +1,40 @@
+version: '3'
+services:
+  backup:
+    image: funnyzak/mysql-backup
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    privileged: true
+    container_name: dev_buildbackup
+    tty: true
+    environment:
+        - TZ=Asia/Shanghai
+        - LANG=C.UTF-8
+        - DB_DUMP_CRON=* * * * *
+        - DB_HOST=192.168.50.21
+        - DB_NAMES=cms_new
+        - DB_USER=root
+        - DB_PASSWORD=helloworld
+        - DB_PORT=1009
+        - DUMP_ONCE_START=true
+        - DB_DUMP_BY_SCHEMA=true
+        - DB_DUMP_TARGET_DIR=/db
+        - MYSQLDUMP_OPTS=
+        - SQL_FILE_EXTENSION=sql
+        - IS_COMPRESS=true
+        - DUMP_FILE_EXPIRE_DAY=10
+        # - BEFORE_DUMP_COMMAND=echo Hello World
+        # - AFTER_DUMP_COMMAND=source /scripts/after_run.sh
+        - APP_NAME=DemoApp
+        # - JISHIDA_TOKEN_LIST=60efd594d5f4a5378
+        # - NOTIFY_URL_LIST=https://request.worktile.com/x7q2
+        # - IFTTT_HOOK_URL_LIST=https://maker.ifttt.com/trigger/cron_notify/with/key/deQYT8eJ
+        - TELEGRAM_BOT_TOKEN=126707:AACDo6-C###292366
+    restart: on-failure
+    volumes:
+      - ./bk/db:/db
+      # - ./test/echo.sh:/scripts/after_run.sh
+      # - ./scripts/cmd.sh:/cmd.sh
+      # - ./scripts/cron-backup.sh:/cron-backup.sh
+      
