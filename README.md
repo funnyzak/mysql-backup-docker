@@ -83,6 +83,8 @@ docker run -d --name mysql-backup \
 
 ### Compose
 
+For example, you want to backup database `cms_new` every day at 00:00, and delete expired dump files after 180 days.
+
 ```yaml
 version: '3'
 services:
@@ -96,7 +98,7 @@ services:
         - TZ=Asia/Shanghai
         - LANG=C.UTF-8
         # Cron
-        - DB_DUMP_CRON=* * * * *
+        - DB_DUMP_CRON=0 0 * * *
         # MySQL Connection
         - DB_HOST=192.168.50.21
         - DB_NAMES=cms_new
