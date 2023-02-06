@@ -1,213 +1,149 @@
-# docker-mysql-backup
+# MySQL backup Docker
 
-only 28 MB. automatically back up the MySQL database and send notification messages docker image.
+[![Build Status][build-status-image]][build-status]
+[![Docker Stars][docker-star-image]][repository-url]
+[![Docker Pulls][docker-pull-image]][repository-url]
+[![GitHub release (latest by date)][latest-release]][repository-url]
+[![GitHub][license-image]][repository-url]
 
-[![Docker Stars](https://img.shields.io/docker/stars/funnyzak/mysql-backup.svg?style=flat-square)](https://hub.docker.com/r/funnyzak/mysql-backup/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/funnyzak/mysql-backup.svg?style=flat-square)](https://hub.docker.com/r/funnyzak/mysql-backup/)
-
-This image is based on Alpine Linux image, which is only a 28MB image.
-
-Installed packages: dcron ca-certificates bash curl wget rsync git zip unzip gzip bzip2 tar tzdata mysql-client
+This is a docker image for MySQL backup. It is based on Alpine Linux and uses [MySQL Client](https://www.mysql.com/) and [MySQLDUMP](https://dev.mysql.com/doc/refman/5.7/en/mysqldump.html) to dump your database.
 
 Download size of this image is:
 
-[![](https://images.microbadger.com/badges/image/funnyzak/mysql-backup.svg)](http://microbadger.com/images/funnyzak/mysql-backup)
+[![Image Size][docker-image-size]][docker-hub-url]
 
-[Docker hub image: funnyzak/mysql-backup](https://hub.docker.com/r/funnyzak/mysql-backup)
+[Docker hub image: funnyzak/mysql-backup][docker-hub-url]
 
-Docker Pull Command: `docker pull funnyzak/mysql-backup`
-
----
+**Docker Pull Command**: `docker pull funnyzak/mysql-backup:latest`
 
 ## Features
 
-* only 28MB
-* dump to local filesystem
-* multiple database backups
-* select database user and password
-* crontab to run a dump
-* when dumping send notification
+- Backup all databases or specified databases.
+- Push message with pushoo.
+- Delete expired dump files.
+- Support custom commands before and after the dump.
+- Support custom mysqldump options.
+- Support compressed dump files.
+- Support crontab rules.
 
----
+## Configuration
 
-## Environment
+The following environment variables are used to configure the container:
 
-The following are the environment variables for a backup:
+### Required
 
-__You should consider the [use of `--env-file=`](https://docs.docker.com/engine/reference/commandline/run/#set-environment-variables--e---env---env-file), [docker secrets](https://docs.docker.com/engine/swarm/secrets/) to keep your secrets out of your shell history__
+The following environment variables are required:
 
-### Connection
+- `DB_DUMP_CRON` - The crontab rule of backup. Default: `0 0 * * *`. Optional.
+- `DB_HOST` - The database host. Required.
+- `DB_PORT` - The database port. Default: `3306`.
+- `DB_USER` - The database user. Required.
+- `DB_PASSWORD` - The database password. Required.
+- `DB_NAMES` - The database name of the dump.For example: dbname1 dbname2.Leave a blank default to all databases.
+- `DUMP_OPTS` - The mysqldump options. Optional. Default: `--single-transaction --quick --lock-tables=false`.
+- `EXPIRE_HOURS` - The expired time of the dump files. Default: `4320`.
 
-* **DB_HOST**:hostname to connect to database. Required.
-* **DB_NAMES**: names of databases to dump. eg: **dbname1 dbname2**. defaults to all databases. Optional.
-* **DB_USER**:  username for the database.  Optional, defaults to root. Optional.
-* **DB_PASSWORD**: password for the database. Required.
-* **DB_PORT**: port to use to connect to database. defaults to 3306, Optional.
+### Optional
 
-### BackUp
+The following environment variables are optional:
 
-* **DUMP_ONCE_START**: Whether to dump when the container is started. Defaults to true. Optional.
-* **DB_DUMP_BY_SCHEMA**: Whether to use separate files per schema in the compressed file (true), if **true**, you need set **DB_NAMES**. or a single dump file (false). Defaults to false. Optional.
-* **DB_DUMP_TARGET_DIR**: starts with a / character, will dump to a local path, which should be volume-mounted. defaults to /db. Optional.
-* **MYSQLDUMP_OPTS**: A string of options to pass to mysqldump, e.g. MYSQLDUMP_OPTS="--opt abc --param def --max_allowed_packet=123455678" will run mysqldump --opt abc --param def --max_allowed_packet=123455678  Optional.
-* **SQL_FILE_EXTENSION**: defaults to sql. Optional.
-* **IS_COMPRESS**: Whether to compressed db files (true). defaults to true. Optional.
-* **DUMP_FILE_EXPIRE_DAY**: dump file expire day, expired will be deleted. defaults to 30. Optional.
-* **BEFORE_DUMP_COMMAND**: before dump then run command. Optional.
-* **AFTER_DUMP_COMMAND**: after dump then run command. Optional.
+- `DB_DUMP_TARGET_DIR_PATH` - The directory path to store the dump files. Default: `/backup`.
+- `TMP_DIR_PATH` - The directory path to store the temporary files. Default: `/tmp/backups`.
+- `DB_DUMP_BY_SCHEMA` - Whether to use separate files for each schema in the compressed file (true), if so, you need to set DB_NAMES. Or single dump file (FALSE). Default: `true`.
+- `DB_FILE_EXTENSION` - The dump file extension. Default: `sql`.
+- `COMPRESS_EXTENSION` - The compress file extension. Default: `zip`.
 
-Before dump has some Available variables:
+### Pushoo
 
-* **now**: dump db files. time variable.
-  
-After dump has some Available variables:
+If you want to receive message with pushoo, you need to set `PUSHOO_PUSH_PLATFORMS` and `PUSHOO_PUSH_TOKENS`.
 
-* **ELAPSED_TIME**: dump db spent time (Second).
-* **DUMPED_DB_FILES**: dump db file name list.
-* **DUMPED_COMPRESS_FILE**: package file name.
+- `SERVER_NAME` - The server name, used for pushoo message. Optional.
+- `PUSHOO_PUSH_PLATFORMS` - The push platforms, separated by commas. Optional.
+- `PUSHOO_PUSH_TOKENS` - The push tokens, separated by commas. Optional.
 
-### Notify
+For more details, please refer to [pushoo-cli](https://github.com/funnyzak/pushoo-cli).
 
-* **NOTIFY_URL_LIST**: Optional. Notify link array , each separated by **|**
-* **TELEGRAM_BOT_TOKEN**: Optional. telegram Bot Token-chatid setting. eg: **token###chatid|token2###chatid2**. each separated by **|** [Official Site](https://core.telegram.org/api).
-* **IFTTT_HOOK_URL_LIST** : Optional. ifttt webhook url array , each separated by **|** [Official Site](https://ifttt.com/maker_webhooks).
-* **DINGTALK_TOKEN_LIST**: Optional. DingTalk Bot TokenList, each separated by **|** [Official Site](http://www.dingtalk.com).
-* **JISHIDA_TOKEN_LIST**: Optional. JiShiDa TokenList, each separated by **|**. [Official Site](http://push.ijingniu.cn/admin/index/).
-* **APP_NAME** : Optional. When setting notify, it is best to set.
+## Usage
 
-### Cron
+### Simple
 
-* **DB_DUMP_CRON**: crontab rules. Defaults to `0 0 * * *`. Optional. [See this](http://crontab.org/).
-
----
-
-## Dump Files
-
-### Dump Path
-
-* sql files will dump to `DB_DUMP_TARGET_DIR/sql`
-* zip files will dump to `DB_DUMP_TARGET_DIR/zip`
-
-### File Name
-
-* dump zip file will named: `dbback_2020-05-09_14-05-00.zip`
-* sql files will named: `your-db-name_dbback_2020-05-09_14-05-00.sql` or `dbback_2020-05-09_14-05-00.sql`
-
----
-
-## Logs
+For example, you want to backup database `dbname1` and `dbname2` every day at 00:00, and delete expired dump files after 180 days.
 
 ```bash
-docker logs -f -t --tail 100 container-name
+docker run -d --name mysql-backup \
+  -e DB_DUMP_CRON="0 0 * * *" \
+  -e DB_HOST="localhost" \
+  -e DB_PORT=3306 \
+  -e DB_USER="root" \
+  -e DB_PASSWORD="root" \
+  -e DB_NAMES="dbname1 dbname2" \
+  -e DB_DUMP_OPTS="--single-transaction --quick --lock-tables=false" \
+  -e EXPIRE_HOURS=4320 \
 ```
 
----
+### Compose
 
-## Run
-
-To run a backup, launch `mysql-backup` image as a container with the correct parameters. Everything is controlled by environment variables passed to the container.
-
-For example:
-
-```bash
-docker run --name=backdb -d --restart=always \
--e 'DB_HOST=db-container' \
--e 'DB_PORT=3306' \
--e 'DB_USER=potato' \
--e 'DB_PASSWORD=123456' \
--e 'DB_NAMES=wordpress_db ghost_db' \
--e 'DUMP_FILE_EXPIRE_DAY=30' \
--e 'DB_DUMP_CRON=0 0 * * *' \
--v '/local/path/db:/db' \
-funnyzak/mysql-backup
-```
-
-The above will run a dump every day at 00:00, from the database accessible in the container `db-container`.
-
-Or, if you prefer compose:
-
-Simple parameter:
-
-```docker-compose
+```yaml
 version: '3'
 services:
-  backup:
+  dbback:
     image: funnyzak/mysql-backup
-    privileged: true
-    container_name: backdb
+    privileged: false
+    container_name: app-db-backup
     tty: true
+    mem_limit: 1024m
     environment:
-      - DB_DUMP_CRON=0 0 * * *
-      - DB_HOST=170.168.10.1
-      - DB_NAMES=dbname1 dbname2
-      - DB_USER=potato
-      - DB_PASSWORD=thisispwd
-      - DB_PORT=3006
+        - TZ=Asia/Shanghai
+        - LANG=C.UTF-8
+        # Cron
+        - DB_DUMP_CRON=* * * * *
+        # MySQL Connection
+        - DB_HOST=192.168.50.21
+        - DB_NAMES=cms_new
+        - DB_USER=root
+        - DB_PASSWORD=helloworld
+        - DB_PORT=1009
+        - DUMP_OPTS=--single-transaction
+        # Expire Hours
+        - EXPIRE_HOURS=4320
+        # COMMAND
+        - BEFORE_DUMP_COMMAND=echo "before dump"
+        - AFTER_DUMP_COMMAND=echo "after dump"
+        # optional
+        - DB_DUMP_TARGET_DIR_PATH=/backup
+        - DB_DUMP_BY_SCHEMA=true
+        - DB_FILE_EXTENSION=sql
+        - COMPRESS_EXTENSION=zip
+        # pushoo 
+        - SERVER_NAME=app-db-backup
+        - PUSHOO_PUSH_PLATFORMS=dingtalk,bark
+        - PUSHOO_PUSH_TOKENS=dingtalk:xxxx,bark:xxxx
     restart: on-failure
     volumes:
-      - bk/db:/db
+      - ./bak/mysql_db:/backup
+
 ```
 
-Complete parameter:
+For more details, please refer to the [docker-compose.yml](example/docker-compose.yml) file.
 
-```docker-compose
-version: '3'
-services:
-  backup:
-    image: funnyzak/mysql-backup
-    privileged: true
-    container_name: backdb
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: '1g'
-    tty: true
-    environment:
-      - TZ=Asia/Shanghai
-      - LANG=C.UTF-8
-      - DB_DUMP_CRON=0 0 * * *
-      - DB_HOST=170.168.10.1
-      - DB_NAMES=dbname1 dbname2
-      - DB_USER=potato
-      - DB_PASSWORD=thisispwd
-      - DB_PORT=3006
-      - DUMP_ONCE_START=true
-      - DB_DUMP_BY_SCHEMA=true
-      - DB_DUMP_TARGET_DIR=/db
-      - MYSQLDUMP_OPTS=
-      - SQL_FILE_EXTENSION=sql
-      - IS_COMPRESS=true
-      - DUMP_FILE_EXPIRE_DAY=30
-      - BEFORE_DUMP_COMMAND=echo hello world
-      - AFTER_DUMP_COMMAND=source /scripts/after_run.sh
-      - APP_NAME=MyApp
-      - JISHIDA_TOKEN_LIST=jishidatoken
-      - TELEGRAM_BOT_TOKEN=123456789:SDFW33-CbovPM2TeHFCiPUDTLy1uYmN04I###9865678987
-      - NOTIFY_URL_LIST=http://link1.com/notify1|http://link2.com/notify2
-      - DINGTALK_TOKEN_LIST=dingtalktoken1|dingtalktoken2
-      - IFTTT_HOOK_URL_LIST=https://maker.ifttt.com/trigger/cron_notify/with/key/ifttttoken-s3Up
-    restart: on-failure
-    volumes:
-      - ./bk/db:/db
-      - ./after_run.sh:/scripts/after_run.sh
-```
+## Contribution
 
----
+If you have any questions or suggestions, please feel free to submit an issue or pull request.
 
-## Automated Build
-
-This github repo is the source for the mysql-backup image. The actual image is stored on the docker hub at `funnyzak/mysql-backup`, and is triggered with each commit to the source by automated build via Webhooks.
-
-There are 2 builds: 1 for version based on the git tag, and another for the particular version number.
-
----
-
-## Further
-
-* After Dump, automatically upload QiNiu, Aliyun, Tencent Cloud.
-
----
+<a href="https://github.com/funnyzak/vue-starter/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=funnyzak/mysql-backup-docker" />
+</a>
 
 ## License
 
-Released under the MIT License.
+MIT License © 2022 [funnyzak](https://github.com/funnyzak)
+
+[build-status-image]: https://github.com/funnyzak/mysql-backup-docker/actions/workflows/build.yml/badge.svg
+[build-status]: https://github.com/funnyzak/mysql-backup-docker/actions
+[repository-url]: https://github.com/funnyzak/mysql-backup-docker
+[license-image]: https://img.shields.io/github/license/funnyzak/mysql-backup-docker?style=flat-square&logo=github&logoColor=white&label=license
+[latest-release]: https://img.shields.io/github/v/release/funnyzak/mysql-backup-docker
+[docker-star-image]: https://img.shields.io/docker/stars/funnyzak/mysql-backup.svg?style=flat-square
+[docker-pull-image]: https://img.shields.io/docker/pulls/funnyzak/mysql-backup.svg?style=flat-square
+[docker-image-size]: https://img.shields.io/docker/image-size/funnyzak/mysql-backup
+[docker-hub-url]: https://hub.docker.com/r/funnyzak/mysql-backup

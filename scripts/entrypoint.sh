@@ -1,5 +1,5 @@
 #!/bin/bash
-# author: potato<silencace@gmail.com>
+# author: Leon<silencace@gmail.com>
 
 set -e
 
