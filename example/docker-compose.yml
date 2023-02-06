@@ -1,0 +1,38 @@
+version: '3'
+services:
+  dbback:
+    image: funnyzak/mysql-backup
+    privileged: false
+    container_name: app-db-backup
+    tty: true
+    mem_limit: 1024m
+    environment:
+        - TZ=Asia/Shanghai
+        - LANG=C.UTF-8
+        # Cron
+        - DB_DUMP_CRON=* * * * *
+        # MySQL Connection
+        - DB_HOST=192.168.50.21
+        - DB_NAMES=cms_new
+        - DB_USER=root
+        - DB_PASSWORD=helloworld
+        - DB_PORT=1009
+        - DUMP_OPTS=--single-transaction
+        # Expire Hours
+        - EXPIRE_HOURS=4320
+        # COMMAND
+        - BEFORE_DUMP_COMMAND=echo "before dump"
+        - AFTER_DUMP_COMMAND=echo "after dump"
+        # optional
+        - DB_DUMP_TARGET_DIR_PATH=/backup
+        - DB_DUMP_BY_SCHEMA=true
+        - DB_FILE_EXTENSION=sql
+        - COMPRESS_EXTENSION=zip
+        # pushoo 
+        - SERVER_NAME=app-db-backup
+        - PUSHOO_PUSH_PLATFORMS=dingtalk,bark
+        - PUSHOO_PUSH_TOKENS=dingtalk:xxxx,bark:xxxx
+    restart: on-failure
+    volumes:
+      - ./bak/mysql_db:/backup
+      

@@ -2,15 +2,14 @@ FROM funnyzak/alpine-cron
 
 ARG BUILD_DATE
 ARG VCS_REF
+ARG VERSION
 
 LABEL org.label-schema.vendor="funnyzak<silenceace@gmail.com>" \
     org.label-schema.name="mysql backup and notify" \
     org.label-schema.build-date="${BUILD_DATE}" \
-    org.label-schema.description="This image is based on Alpine Linux image, which is only a 28MB image." \
-    org.label-schema.docker.cmd="docker run --name=backdb -d --restart=always  -e 'DB_HOST=db-container'  -e 'DB_PORT=3306'  -e 'DB_USER=potato'  -e 'DB_PASSWORD=123456'  -e 'DB_NAMES=wordpress_db ghost_db'  -e 'DUMP_FILE_EXPIRE_DAY=30'  -e 'DB_DUMP_CRON=0 0 * * *'  -v '/local/path/db:/db'  funnyzak/mysql-backup" \
+    org.label-schema.description="This image is based on Alpine Linux image, use to backup mysql database and notify" \
     org.label-schema.url="https://yycc.me" \
-    org.label-schema.version="1.0.0" \
-    org.label-schema.schema-version="1.0"	\
+    org.label-schema.schema-version="${VERSION}"	\
     org.label-schema.vcs-type="Git" \
     org.label-schema.vcs-ref="${VCS_REF}" \
     org.label-schema.vcs-url="https://github.com/funnyzak/mysql-backup-docker" 
@@ -23,44 +22,34 @@ RUN apk update && apk upgrade && \
     apk add --no-cache mysql-client mariadb-connector-c && \
     rm  -rf /tmp/* /var/cache/apk/*
 
-# create temp folder
-RUN mkdir -p /tmp/backups
 
-# temp dir
-ENV TMPDIR /tmp/backups
+ENV TMP_DIR_PATH /tmp/backups
 
-# db connection
-ENV DB_HOST=
-ENV DB_NAMES=
-ENV DB_USER=root
-ENV DB_PASSWORD=123456
-ENV DB_PORT=3306
-
-# backup setting
-ENV DUMP_ONCE_START true
+ENV SERVER_NAME mysql-backup-server
+ENV DB_DUMP_TARGET_DIR_PATH /backup
 ENV DB_DUMP_BY_SCHEMA true
-ENV DB_DUMP_TARGET_DIR /db
-ENV MYSQLDUMP_OPTS=
-ENV SQL_FILE_EXTENSION sql
-ENV IS_COMPRESS true
-ENV DUMP_FILE_EXPIRE_DAY 30
-ENV BEFORE_DUMP_COMMAND=
-ENV AFTER_DUMP_COMMAND=
+ENV DUMP_OPTS --single-transaction --quick --lock-tables=false
+ENV DB_FILE_EXTENSION sql
+ENV COMPRESS_EXTENSION zip
+ENV EXPIRE_HOURS 4320
 
-# notify setting
-ENV APP_NAME DB BACK TASK
-ENV JISHIDA_TOKEN_LIST=
-ENV IFTTT_HOOK_URL_LIST=
-ENV NOTIFY_URL_LIST=
-ENV DINGTALK_TOKEN_LIST=
+ENV DB_HOST
+ENV DB_PORT 3306
+ENV DB_USER root
+ENV DB_PASSWORD
+ENV DB_NAMES
 
-# back up crontab
+ENV BEFORE_DUMP_COMMAND
+ENV AFTER_DUMP_COMMAND
+
+ENV PUSHOO_PUSH_PLATFORMS
+ENV PUSHOO_PUSH_TOKENS
+
 ENV DB_DUMP_CRON 0 0 * * *
 
-# copy scripts
-COPY /scripts/* /
+COPY /scripts/* /run-scripts/
+RUN chmod +x /run-scripts/*
 
-# add permission
-RUN chmod +x /cron-backup.sh
+WORKDIR /run-scripts
 
-CMD ["/bin/bash", "/cmd.sh"]
+ENTRYPOINT ["/bin/bash", "/run-scripts/entrypoint.sh"]

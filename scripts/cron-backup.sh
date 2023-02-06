@@ -1,136 +1,148 @@
 #!/bin/bash
-# author: potato<silencace@gmail.com>
+# author: Leon<silencace@gmail.com>
 
-source /utils.sh
+export PATH=$PATH:/usr/local/bin
 
-# dumped db file list name
-DUMPED_DB_FILES=
+# log message
+# usage: log "message" "level" "push_message"
+# example: log "hello world" "info" "true"
+log() {
+  log_level="info"
+  push_message="false"
+  if [ -n "$2" ]; then
+    log_level=$2
+  fi
+  if [ -n "$3" ]; then
+    push_message=$3
+  fi
 
-# package file name
-DUMPED_COMPRESS_FILE=
+  echo -e "$(date '+%Y-%m-%d %H:%M:%S') [${log_level}] $1 "
 
-function do_dump() {
-    work_dir=$TMPDIR
-    rm ${TMPDIR}/* -rf
-    cd $work_dir
-
-    if [ -n "$DB_NAMES" -a -n "$DB_DUMP_BY_SCHEMA" -a "$DB_DUMP_BY_SCHEMA" = "true" ]; then
-        for onedb in $DB_NAMES; do
-            echo -e "dump db name: $onedb"
-            mysqldump --no-tablespaces -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD --databases ${onedb} $MYSQLDUMP_OPTS > $work_dir/${onedb}_${dump_name_tail}.${SQL_FILE_EXTENSION}
-            [ $? -ne 0 ] && return 1
-        done
-    else
-        # just a single command
-        if [[ -n "$DB_NAMES" ]]; then
-            DB_LIST="--databases $DB_NAMES"
-        else
-            DB_LIST="-A"
-        fi
-            mysqldump --no-tablespaces -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_LIST $MYSQLDUMP_OPTS > $work_dir/${dump_name_tail}.${SQL_FILE_EXTENSION}
-        [ $? -ne 0 ] && return 1
-    fi
-
-    DUMPED_DB_FILES=$(ls *.${SQL_FILE_EXTENSION})
-    DUMPED_COMPRESS_FILE=${dump_name_tail}.zip
-
-    if [ -n "$IS_COMPRESS" -a "$IS_COMPRESS" = "true" ]; then
-        mkdir -p $DB_DUMP_TARGET_DIR/zip
-        echo -e "\ncompress db sql files:\n${DUMPED_DB_FILES}"
-        zip $work_dir/${DUMPED_COMPRESS_FILE} ./*.${SQL_FILE_EXTENSION} && (mv $work_dir/${DUMPED_COMPRESS_FILE} $DB_DUMP_TARGET_DIR/zip/${DUMPED_COMPRESS_FILE})
-    fi
-
-    mkdir -p $DB_DUMP_TARGET_DIR/sql
-    mv $work_dir/*.${SQL_FILE_EXTENSION} $DB_DUMP_TARGET_DIR/sql
+  if [ "$push_message" = "true" ]; then
+    pushoo -P "${PUSHOO_PUSH_PLATFORMS}" -K "${PUSHOO_PUSH_TOKENS}" -C "$SERVER_NAME MySQL Backup, Backup Database: $DB_NAMES On $DB_HOST:$DB_PORT To $DB_DUMP_TARGET_DIR_PATH, Message: $1" -T "$SERVER_NAME MySQL Backup"
+  fi
 }
 
-echo -e "\n\nDB BACK TASK START=============================================="
+prepare() {
+  log "Check config and prepare environment..."
 
-# notify 
-# notify_all "DbBackUp" "Progressing.."
+  # delete temp files
+  rm -rf ${TMP_DIR_PATH}/*
 
-# sql file ext
-if [ -z "${SQL_FILE_EXTENSION}" ]; then
-  echo "SQL_FILE_EXTENSION not provided, defaulting sql"
-  SQL_FILE_EXTENSION=sql
-fi
+  # if db_password is empty, log error and exit
+  if [ -z "$DB_PASSWORD" ]; then
+    log "db_password is empty, please check it." "error" "true"
+    exit 1
+  fi
 
-# database user
-if [ -z "${DB_USER}" ]; then
-  echo "DB_USER not provided, defaulting root"
-  DB_USER=root
-fi
+  # if db_port is empty, log error and exit
+  if [ -z "$DB_PORT" ]; then
+    log "db_port is empty, please check it." "error" "true"
+    exit 1
+  fi
 
-# is_compress
-if [ -z "${IS_COMPRESS}" ]; then
-  echo "IS_COMPRESS not provided, defaulting true"
-  IS_COMPRESS=true
-fi
+  # if db_user is empty, log error and exit
+  if [ -z "$DB_USER" ]; then
+    log "db_user is empty, please check it." "error" "true"
+    exit 1
+  fi
 
-# database port
-if [ -z "${DB_PORT}" ]; then
-  echo "DB_PORT not provided, defaulting to 3306"
-  DB_PORT=3306
-fi
+  # if db_host is empty, log error and exit
+  if [ -z "$DB_HOST" ]; then
+    log "db_host is empty, please check it." "error" "true"
+    exit 1
+  fi
 
-# bk locat path
-if [ -z "${DB_DUMP_TARGET_DIR}" ]; then
-  echo "DB_DUMP_TARGET_DIR not provided, defaulting /db"
-  DB_DUMP_TARGET_DIR=/db
-fi
+  # create tmp dir and target dir
+  mkdir -p $TMP_DIR_PATH
+  mkdir -p $DB_DUMP_TARGET_DIR_PATH
 
-# expire day
-if [ -z "${DUMP_FILE_EXPIRE_DAY}" ]; then
-  echo "DUMP_FILE_EXPIRE_DAY not provided, defaulting 180"
-  DUMP_FILE_EXPIRE_DAY=180
-fi
+  log "Check config and prepare environment done."
+}
 
-# init variable
-now=$(date +%Y-%m-%d_%H-%M-%S)
-dump_name_tail=dbback_$now
-expire_minute=`expr $DUMP_FILE_EXPIRE_DAY \* 1440`
+do_dump() {
+  cd $TMP_DIR_PATH
 
-echo -e "\nShow Variable:"
-echo -e "now => ${now}\ndump_name_tail => ${dump_name_tail}"
-echo -e "expire_minute => ${expire_minute}"
+  # dump db
+  if [ -n "$DB_NAMES" -a -n "$DB_DUMP_BY_SCHEMA" -a "$DB_DUMP_BY_SCHEMA" = "true" ]; then
+    for onedb in $DB_NAMES; do
+      log "current dump db: ${onedb}..."
+      # dump db and if fail log 
+      mysqldump --no-tablespaces -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD --databases ${onedb} $DUMP_OPTS > $TMP_DIR_PATH/${onedb}_${DUMP_NAME_TAIL}.${DB_FILE_EXTENSION} 2>tmp_error_log || (log "dump db ${onedb} failed, error message: $(cat tmp_error_log)" "error" "true" && exit 1)
+    done
+  else
+    if [[ -n "$DB_NAMES" ]]; then
+      log "current dump db: ${DB_NAMES}..."
+      DB_LIST="--databases $DB_NAMES"
+    else
+      log "current dump all db..."
+      DB_LIST="-A"
+    fi
+    mysqldump --no-tablespaces -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_LIST $DUMP_OPTS > $TMP_DIR_PATH/${DUMP_NAME_TAIL}.${DB_FILE_EXTENSION}  2>tmp_error_log || (log "dump db failed, error message: $(cat tmp_error_log)" "error" "true" && exit 1)
+    [ $? -ne 0 ] && return 1
+  fi
 
-# before command
-if [ -n "$BEFORE_DUMP_COMMAND" ]; then
-    echo -e "\nrun before dump command: ${BEFORE_DUMP_COMMAND}"
-    $BEFORE_DUMP_COMMAND 2>tmp_error_log || (notify_all "DbBackUp" "BEFORE_DUMP_COMMAND Execute Error: `cat tmp_error_log`.")
-fi
+  # compress db sql files
+  if [ -n "$COMPRESS_EXTENSION" ]; then
+    DUMPED_DB_FILES=$(ls *.${DB_FILE_EXTENSION})
+    DUMPED_COMPRESS_FILE_NAME="${DUMP_NAME_TAIL}.${COMPRESS_EXTENSION}"
+    COMPESS_FILE_PATH="$DB_DUMP_TARGET_DIR_PATH/zip"
+    mkdir -p $COMPESS_FILE_PATH
 
-# start back db
-START_TIME=$(date +%s)
-echo -e "\nBackup:: Task Start -- $(date +%Y-%m-%d_%H:%M)"
+    log "\ncompress db sql files:\n${DUMPED_DB_FILES}"
+    zip $TMP_DIR_PATH/${DUMPED_COMPRESS_FILE_NAME} ./*.${DB_FILE_EXTENSION} >/dev/null 2>tmp_error_log
+    if [ $? -ne 0 ]; then
+      log "compress db sql files failed. error message: $(cat tmp_error_log)" "error"
+    else
+      mv $TMP_DIR_PATH/${DUMPED_COMPRESS_FILE_NAME} $COMPESS_FILE_PATH/${DUMPED_COMPRESS_FILE_NAME}
+      log "compress db sql files done. compress file path: ${COMPESS_FILE_PATH}/${DUMPED_COMPRESS_FILE_NAME}\n"
+    fi
+  fi
 
-do_dump
+  mkdir -p $DB_DUMP_TARGET_DIR_PATH/sql
+  mv $TMP_DIR_PATH/*.${DB_FILE_EXTENSION} $DB_DUMP_TARGET_DIR_PATH/sql
+}
 
-#(notify_all "DbBackUp" "DUMP DB TASK Error.")
-END_TIME=$(date +%s)
-ELAPSED_TIME=$(( $END_TIME - $START_TIME ))
+db_back() {
+  log "Start to dump database..." "info" "true"
 
-echo -e "Backup :: Task End -- $(date +%Y-%m-%d_%H:%M)"
-echo -e "Elapsed Time ::  $(date -d 00:00:$ELAPSED_TIME +%Hh:%Mm:%Ss)"
-# end back db
+  NOW_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+  DUMP_NAME_TAIL=dbback_$NOW_TIME
+  EXPIRE_MINUTE=`expr $EXPIRE_HOURS \* 60`
 
-# delete older db files
-echo -e "\nDelete DB Files Older Than ${DUMP_FILE_EXPIRE_DAY} Days with *.zip|*.${SQL_FILE_EXTENSION} Extension."
-find $DB_DUMP_TARGET_DIR -maxdepth 2 -name "*.zip" -type f -mmin +$expire_minute -exec rm -f {} \;
-find $DB_DUMP_TARGET_DIR -maxdepth 2 -name "*.${SQL_FILE_EXTENSION}" -type f -mmin +$expire_minute -exec rm -f {} \;
+  DB_HOST_CUT=$(echo $DB_HOST | cut -c 1-5)$(echo $DB_HOST | cut -c 6- | sed 's/./\*/g')
+  DB_PASSWORD_CUT=$(echo $DB_PASSWORD | cut -c 1-5)$(echo $DB_PASSWORD | cut -c 6- | sed 's/./\*/g')
 
-# after command
-if [ -n "$AFTER_DUMP_COMMAND" ]; then
-    echo -e "\nrun after dump command: ${AFTER_DUMP_COMMAND}"
-    $AFTER_DUMP_COMMAND 2>tmp_error_log || (notify_all "DbBackUp" "AFTER_DUMP_COMMAND Execute Error: `cat tmp_error_log`.")
-fi
 
-# notify 
-notify_all "DbBackUp" "Completed"
+  log "\nBackUP Configurations:\nExpire Hours: ${EXPIRE_HOURS}\nDump Name Tail: ${DUMP_NAME_TAIL}\nCompress File Extension: ${COMPRESS_EXTENSION}\nDB Dump By Schema: ${DB_DUMP_BY_SCHEMA}\nDump Opts: ${DUMP_OPTS}\nDB File Extension: ${DB_FILE_EXTENSION}\nDB Dump Target Dir Path: ${DB_DUMP_TARGET_DIR_PATH}\nBefore Dump Command: ${BEFORE_DUMP_COMMAND}\nAfter Dump Command: ${AFTER_DUMP_COMMAND}\n\nDB Connection Configurations:\nDB Host: ${DB_HOST_CUT}\nDB Port: ${DB_PORT}\nDB User: ${DB_USER}\nDB Password: ${DB_PASSWORD_CUT}\nDB Names: ${DB_NAMES}"
 
-# delete tmp error log
-if [ -e "tmp_error_log" ]; then
-    rm tmp_error_log
-fi
+  if [ -n "$BEFORE_DUMP_COMMAND" ]; then
+      log "execute before dump command: ${BEFORE_DUMP_COMMAND}"
+      $BEFORE_DUMP_COMMAND 2>tmp_error_log || (log "execute before dump command failed. error message: `cat tmp_error_log`" "error" "true")
+  fi
 
-echo -e "DB BACK TASK END=============================================="
+  START_TIME=$(date +%s)
+  log "Start to dump database..."
+  do_dump
+  END_TIME=$(date +%s)
+  ELAPSED_TIME=$(( $END_TIME - $START_TIME ))
+  log "Dump database done. Elapsed time: ${ELAPSED_TIME} s."
+
+  log "remove expired files.."
+  # print and remove expired files
+  find $DB_DUMP_TARGET_DIR_PATH -maxdepth 2 -name "*.${COMPRESS_EXTENSION}" -type f -mmin +$EXPIRE_MINUTE -exec log {} \; -exec rm -f {} \;
+  find $DB_DUMP_TARGET_DIR_PATH -maxdepth 2 -name "*.${DB_FILE_EXTENSION}" -type f -mmin +$EXPIRE_MINUTE -exec log {} \; -exec rm -f {} \;
+  log "remove expired files done."
+
+  if [ -n "$AFTER_DUMP_COMMAND" ]; then
+      log "execute after dump command: ${AFTER_DUMP_COMMAND}"
+      $AFTER_DUMP_COMMAND 2>tmp_error_log || (log "execute after dump command failed. error message: `cat tmp_error_log`" "error" "true")
+  fi
+
+  log "Database backup task done. elapsed time: ${ELAPSED_TIME} s." "info" "true"
+
+  # remove tmp_error_log
+  rm tmp_error_log 2>/dev/null
+}
+
+db_back
