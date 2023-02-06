@@ -10,7 +10,7 @@ services:
         - TZ=Asia/Shanghai
         - LANG=C.UTF-8
         # Cron
-        - DB_DUMP_CRON=* * * * *
+        - DB_DUMP_CRON=0 0 * * *
         # MySQL Connection
         - DB_HOST=192.168.50.21
         - DB_NAMES=cms_new
@@ -21,6 +21,7 @@ services:
         # Expire Hours
         - EXPIRE_HOURS=4320
         # COMMAND
+        - STARTUP_COMMAND=echo "startup"
         - BEFORE_DUMP_COMMAND=echo "before dump"
         - AFTER_DUMP_COMMAND=echo "after dump"
         # optional
@@ -28,6 +29,7 @@ services:
         - DB_DUMP_BY_SCHEMA=true
         - DB_FILE_EXTENSION=sql
         - COMPRESS_EXTENSION=zip
+        - DUMP_AT_STARTUP=true
         # pushoo 
         - SERVER_NAME=app-db-backup
         - PUSHOO_PUSH_PLATFORMS=dingtalk,bark

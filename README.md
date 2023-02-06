@@ -47,11 +47,15 @@ The following environment variables are required:
 
 The following environment variables are optional:
 
+- `DUMP_AT_STARTUP` - Whether to dump at startup. Default: `true`.
 - `DB_DUMP_TARGET_DIR_PATH` - The directory path to store the dump files. Default: `/backup`.
 - `TMP_DIR_PATH` - The directory path to store the temporary files. Default: `/tmp/backups`.
 - `DB_DUMP_BY_SCHEMA` - Whether to use separate files for each schema in the compressed file (true), if so, you need to set DB_NAMES. Or single dump file (FALSE). Default: `true`.
 - `DB_FILE_EXTENSION` - The dump file extension. Default: `sql`.
 - `COMPRESS_EXTENSION` - The compress file extension. Default: `zip`.
+- `STARTUP_COMMAND` - The command to execute at startup. Optional.
+- `BEFORE_DUMP_COMMAND` - The command to execute before the dump. Optional.
+- `AFTER_DUMP_COMMAND` - The command to execute after the dump. Optional.
 
 ### Pushoo
 
@@ -109,6 +113,7 @@ services:
         # Expire Hours
         - EXPIRE_HOURS=4320
         # COMMAND
+        - STARTUP_COMMAND=echo "startup"
         - BEFORE_DUMP_COMMAND=echo "before dump"
         - AFTER_DUMP_COMMAND=echo "after dump"
         # optional
@@ -116,6 +121,7 @@ services:
         - DB_DUMP_BY_SCHEMA=true
         - DB_FILE_EXTENSION=sql
         - COMPRESS_EXTENSION=zip
+        - DUMP_AT_STARTUP=true
         # pushoo 
         - SERVER_NAME=app-db-backup
         - PUSHOO_PUSH_PLATFORMS=dingtalk,bark
@@ -123,7 +129,6 @@ services:
     restart: on-failure
     volumes:
       - ./bak/mysql_db:/backup
-
 ```
 
 For more details, please refer to the [docker-compose.yml](example/docker-compose.yml) file.

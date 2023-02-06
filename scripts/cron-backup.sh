@@ -19,7 +19,12 @@ log() {
   echo -e "$(date '+%Y-%m-%d %H:%M:%S') [${log_level}] $1 "
 
   if [ -n "$PUSHOO_PUSH_PLATFORMS" -a -n "$PUSHOO_PUSH_TOKENS" ] && [ "$push_message" = "true" ]; then
-    pushoo -P "${PUSHOO_PUSH_PLATFORMS}" -K "${PUSHOO_PUSH_TOKENS}" -C "$SERVER_NAME MySQL Backup, Backup Database: $DB_NAMES On $DB_HOST:$DB_PORT To $DB_DUMP_TARGET_DIR_PATH, Message: $1" -T "$SERVER_NAME MySQL Backup"
+    pushoo -P "${PUSHOO_PUSH_PLATFORMS}" -K "${PUSHOO_PUSH_TOKENS}" -C "$SERVER_NAME MySQL Backup, Backup Database: $DB_NAMES On $DB_HOST:$DB_PORT To $DB_DUMP_TARGET_DIR_PATH, Message: $1" -T "$SERVER_NAME MySQL Backup" > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      echo -e "$(date '+%Y-%m-%d %H:%M:%S') [error] push message failed."
+    else 
+      echo -e "$(date '+%Y-%m-%d %H:%M:%S') [info] push message success."
+    fi
   fi
 }
 
@@ -144,5 +149,7 @@ db_back() {
   # remove tmp_error_log
   rm tmp_error_log 2>/dev/null
 }
+
+prepare
 
 db_back
