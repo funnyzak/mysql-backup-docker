@@ -18,7 +18,7 @@ log() {
 
   echo -e "$(date '+%Y-%m-%d %H:%M:%S') [${log_level}] $1 "
 
-  if [ "$push_message" = "true" ]; then
+  if [ -n "$PUSHOO_PUSH_PLATFORMS" -a -n "$PUSHOO_PUSH_TOKENS" ] && [ "$push_message" = "true" ]; then
     pushoo -P "${PUSHOO_PUSH_PLATFORMS}" -K "${PUSHOO_PUSH_TOKENS}" -C "$SERVER_NAME MySQL Backup, Backup Database: $DB_NAMES On $DB_HOST:$DB_PORT To $DB_DUMP_TARGET_DIR_PATH, Message: $1" -T "$SERVER_NAME MySQL Backup"
   fi
 }
