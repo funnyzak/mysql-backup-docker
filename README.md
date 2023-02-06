@@ -16,6 +16,8 @@ Download size of this image is:
 
 **Docker Pull Command**: `docker pull funnyzak/mysql-backup:latest`
 
+Attention: Current version is not compatible old version, please use tag `0.1.1` if you want to use old version.
+
 ## Features
 
 - Backup all databases or specified databases.
