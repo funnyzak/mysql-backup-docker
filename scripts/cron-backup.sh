@@ -100,6 +100,7 @@ do_dump() {
       log "compress db sql files failed. error message: $(cat tmp_error_log)" "error"
     else
       mv $TMP_DIR_PATH/${DUMPED_COMPRESS_FILE_NAME} $COMPESS_FILE_PATH/${DUMPED_COMPRESS_FILE_NAME}
+      echo -e "Backup DB List: \n$(ls -lh *.${DB_FILE_EXTENSION})" > $COMPESS_FILE_PATH/${DUMPED_COMPRESS_FILE_NAME}.txt
       log "compress db sql files done. compress file path: ${COMPESS_FILE_PATH}/${DUMPED_COMPRESS_FILE_NAME}\n"
     fi
   fi
@@ -137,6 +138,8 @@ db_back() {
   # print and remove expired files
   find $DB_DUMP_TARGET_DIR_PATH -maxdepth 2 -name "*.${COMPRESS_EXTENSION}" -type f -mmin +$EXPIRE_MINUTE -exec log {} \; -exec rm -f {} \;
   find $DB_DUMP_TARGET_DIR_PATH -maxdepth 2 -name "*.${DB_FILE_EXTENSION}" -type f -mmin +$EXPIRE_MINUTE -exec log {} \; -exec rm -f {} \;
+  find $DB_DUMP_TARGET_DIR_PATH -maxdepth 2 -name "*.txt" -type f -mmin +$EXPIRE_MINUTE -exec echo {} \; -exec rm -f {} \;
+
   log "remove expired files done."
 
   if [ -n "$AFTER_DUMP_COMMAND" ]; then
