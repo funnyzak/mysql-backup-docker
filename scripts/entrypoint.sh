@@ -13,7 +13,7 @@ chmod -R 0644 /var/spool/cron/crontabs
 
 # STARTUP_COMMAND
 if [ -n "$STARTUP_COMMAND" ]; then
-    log "execute startup command: ${STARTUP_COMMAND}"
+    echo -e "execute startup command: ${STARTUP_COMMAND}"
     $STARTUP_COMMAND 2>tmp_error_log || (echo "execute after dump command failed. error message: `cat tmp_error_log`")
 fi
 # run once start
